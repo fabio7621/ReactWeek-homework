@@ -67,11 +67,15 @@ function App() {
   //model
   const productRef = useRef(null);
   const prodModel = useRef(null);
+  const delProductRef = useRef(null);
+  const delprodModel = useRef(null);
   const [modelMode, setModelMode] = useState(null);
+
   useEffect(() => {
     prodModel.current = new Modal(productRef.current);
+    delprodModel.current = new Modal(delProductRef.current);
   }, []);
-
+  //產品跳窗
   const openProductModel = (mode, product) => {
     setModelMode(mode);
     if (mode === "edit") {
@@ -94,22 +98,18 @@ function App() {
     prodModel.current.show();
   };
   const closeProductModel = () => {
-    setTempProduct({
-      imageUrl: "",
-      title: "",
-      category: "",
-      unit: "",
-      origin_price: "",
-      price: "",
-      description: "",
-      content: "",
-      is_enabled: 0,
-      imagesUrl: [""],
-    });
     prodModel.current.hide();
   };
-
+  //刪除跳窗
+  const openDelModel = (product) => {
+    delprodModel.current.show();
+    setTempProduct(product);
+  };
+  const closeDelModel = () => {
+    delprodModel.current.hide();
+  };
   //product
+  //表單內操作
   const [tempProduct, setTempProduct] = useState({
     imageUrl: "",
     title: "",
@@ -141,6 +141,80 @@ function App() {
     });
   };
 
+  const handleImageAdd = () => {
+    const newImages = [...tempProduct.imagesUrl, ""];
+    setTempProduct({
+      ...tempProduct,
+      imagesUrl: newImages,
+    });
+  };
+  const handleImageDel = () => {
+    const newImages = [...tempProduct.imagesUrl];
+    newImages.pop();
+    setTempProduct({
+      ...tempProduct,
+      imagesUrl: newImages,
+    });
+  };
+
+  //新增更新產品api
+  const createProduct = async () => {
+    try {
+      await axios.post(`${apiUrl}/v2/api/${apiPath}/admin/product`, {
+        data: {
+          ...tempProduct,
+          origin_price: Number(tempProduct.origin_price),
+          price: Number(tempProduct.price),
+          is_enabled: tempProduct.is_enabled ? 1 : 0,
+        },
+      });
+    } catch (error) {
+      alert("新增產品失敗");
+    }
+  };
+  const editProduct = async () => {
+    try {
+      await axios.put(`${apiUrl}/v2/api/${apiPath}/admin/product/${tempProduct.id}`, {
+        data: {
+          ...tempProduct,
+          origin_price: Number(tempProduct.origin_price),
+          price: Number(tempProduct.price),
+          is_enabled: tempProduct.is_enabled ? 1 : 0,
+        },
+      });
+    } catch (error) {
+      alert("更新產品失敗");
+    }
+  };
+  const updateProduct = async () => {
+    const apiCall = modelMode === "create" ? createProduct : editProduct;
+    try {
+      await apiCall();
+      getProducts();
+      closeProductModel();
+    } catch (error) {
+      alert("更新產品失敗");
+    }
+  };
+
+  const delProduct = async () => {
+    try {
+      await axios.delete(`${apiUrl}/v2/api/${apiPath}/admin/product/${tempProduct.id}`);
+    } catch (error) {
+      alert("刪除產品失敗");
+    }
+  };
+
+  const handleDelProduct = async () => {
+    try {
+      await delProduct();
+      getProducts();
+      closeDelModel();
+    } catch (error) {
+      alert("刪除產品失敗");
+    }
+  };
+
   return (
     <>
       {isAuth ? (
@@ -170,13 +244,13 @@ function App() {
                       <th scope="row">{product.title}</th>
                       <td>{product.origin_price}</td>
                       <td>{product.price}</td>
-                      <td>{product.is_enabled}</td>
+                      <td>{product.is_enabled ? <span className="text-success">啟用</span> : <span>未啟用</span>}</td>
                       <td>
                         <div className="btn-group">
                           <button onClick={() => openProductModel("edit", product)} type="button" className="btn btn-outline-primary btn-sm">
                             編輯
                           </button>
-                          <button type="button" className="btn btn-outline-danger btn-sm">
+                          <button onClick={() => openDelModel(product)} type="button" className="btn btn-outline-danger btn-sm">
                             刪除
                           </button>
                         </div>
@@ -239,6 +313,7 @@ function App() {
                     <div className="input-group">
                       <input
                         name="imageUrl"
+                        value={tempProduct.imageUrl}
                         type="text"
                         id="primary-image"
                         className="form-control"
@@ -269,6 +344,20 @@ function App() {
                         {image && <img src={image} alt={`副圖 ${index + 1}`} className="img-fluid mb-2" />}
                       </div>
                     ))}
+                    <div className="btn-group gap-2 w-100 mt-3">
+                      {Array.isArray(tempProduct.imagesUrl) &&
+                        tempProduct.imagesUrl.length < 5 &&
+                        tempProduct.imagesUrl[tempProduct.imagesUrl.length - 1] !== "" && (
+                          <button onClick={handleImageAdd} className="btn btn-outline-primary btn-sm w-100 round-4">
+                            新增圖片
+                          </button>
+                        )}
+                      {Array.isArray(tempProduct.imagesUrl) && tempProduct.imagesUrl.length > 1 && (
+                        <button onClick={handleImageDel} className="btn btn-outline-danger btn-sm w-100 round-4">
+                          取消圖片
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
 
@@ -400,8 +489,30 @@ function App() {
               <button onClick={closeProductModel} type="button" className="btn btn-secondary">
                 取消
               </button>
-              <button type="button" className="btn btn-primary">
+              <button onClick={updateProduct} type="button" className="btn btn-primary">
                 確認
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div ref={delProductRef} className="modal fade" id="delProductModal" tabIndex="-1" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
+        <div className="modal-dialog modal-dialog-centered">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h1 className="modal-title fs-5">刪除產品</h1>
+              <button type="button" className="btn-close" onClick={closeDelModel}></button>
+            </div>
+            <div className="modal-body">
+              你是否要刪除
+              <span className="text-danger fw-bold">{tempProduct.title}</span>
+            </div>
+            <div className="modal-footer">
+              <button onClick={closeDelModel} type="button" className="btn btn-secondary">
+                取消
+              </button>
+              <button onClick={handleDelProduct} type="button" className="btn btn-danger">
+                刪除
               </button>
             </div>
           </div>
