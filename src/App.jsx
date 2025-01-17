@@ -40,7 +40,7 @@ function App() {
       const res = await axios.post(`${apiUrl}/v2/admin/signin`, account);
 
       const { token, expired } = res.data;
-      document.cookie = `hexToken=${token}; expires=${new Date(expired)}`;
+      document.cookie = `fabio20=${token}; expires=${new Date(expired)}`;
 
       getProducts();
       setIsAuth(true);
@@ -61,7 +61,7 @@ function App() {
 
   useEffect(() => {
     checkUserLogin();
-    const token = document.cookie.replace(/(?:(?:^|.*;\s*)hexToken\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+    const token = document.cookie.replace(/(?:(?:^|.*;\s*)fabio20\s*\=\s*([^;]*).*$)|^.*$/, "$1");
     axios.defaults.headers.common["Authorization"] = token;
   }, []);
   //model
