@@ -41,7 +41,7 @@ function App() {
 
       const { token, expired } = res.data;
       document.cookie = `fabio20=${token}; expires=${new Date(expired)}`;
-
+      axios.defaults.headers.common["Authorization"] = token;
       getProducts();
       setIsAuth(true);
     } catch (error) {
@@ -61,7 +61,10 @@ function App() {
 
   useEffect(() => {
     checkUserLogin();
-    const token = document.cookie.replace(/(?:(?:^|.*;\s*)fabio20\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+    const token = document.cookie.replace(
+      /(?:(?:^|.*;\s*)fabio20\s*\=\s*([^;]*).*$)|^.*$/,
+      "$1"
+    );
     axios.defaults.headers.common["Authorization"] = token;
   }, []);
   //model
@@ -174,14 +177,17 @@ function App() {
   };
   const editProduct = async () => {
     try {
-      await axios.put(`${apiUrl}/v2/api/${apiPath}/admin/product/${tempProduct.id}`, {
-        data: {
-          ...tempProduct,
-          origin_price: Number(tempProduct.origin_price),
-          price: Number(tempProduct.price),
-          is_enabled: tempProduct.is_enabled ? 1 : 0,
-        },
-      });
+      await axios.put(
+        `${apiUrl}/v2/api/${apiPath}/admin/product/${tempProduct.id}`,
+        {
+          data: {
+            ...tempProduct,
+            origin_price: Number(tempProduct.origin_price),
+            price: Number(tempProduct.price),
+            is_enabled: tempProduct.is_enabled ? 1 : 0,
+          },
+        }
+      );
     } catch (error) {
       alert("更新產品失敗");
     }
@@ -199,7 +205,9 @@ function App() {
 
   const delProduct = async () => {
     try {
-      await axios.delete(`${apiUrl}/v2/api/${apiPath}/admin/product/${tempProduct.id}`);
+      await axios.delete(
+        `${apiUrl}/v2/api/${apiPath}/admin/product/${tempProduct.id}`
+      );
     } catch (error) {
       alert("刪除產品失敗");
     }
@@ -223,7 +231,11 @@ function App() {
             <div className="col">
               <div className="d-flex justify-content-between">
                 <h2>產品列表</h2>
-                <button onClick={() => openProductModel("create")} type="button" className="btn btn-primary">
+                <button
+                  onClick={() => openProductModel("create")}
+                  type="button"
+                  className="btn btn-primary"
+                >
                   新增產品
                 </button>
               </div>
@@ -244,13 +256,27 @@ function App() {
                       <th scope="row">{product.title}</th>
                       <td>{product.origin_price}</td>
                       <td>{product.price}</td>
-                      <td>{product.is_enabled ? <span className="text-success">啟用</span> : <span>未啟用</span>}</td>
+                      <td>
+                        {product.is_enabled ? (
+                          <span className="text-success">啟用</span>
+                        ) : (
+                          <span>未啟用</span>
+                        )}
+                      </td>
                       <td>
                         <div className="btn-group">
-                          <button onClick={() => openProductModel("edit", product)} type="button" className="btn btn-outline-primary btn-sm">
+                          <button
+                            onClick={() => openProductModel("edit", product)}
+                            type="button"
+                            className="btn btn-outline-primary btn-sm"
+                          >
                             編輯
                           </button>
-                          <button onClick={() => openDelModel(product)} type="button" className="btn btn-outline-danger btn-sm">
+                          <button
+                            onClick={() => openDelModel(product)}
+                            type="button"
+                            className="btn btn-outline-danger btn-sm"
+                          >
                             刪除
                           </button>
                         </div>
@@ -295,12 +321,24 @@ function App() {
           <p className="mt-5 mb-3 text-muted">&copy; 2024~∞ - 六角學院</p>
         </div>
       )}
-      <div ref={productRef} id="productModal" className="modal" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
+      <div
+        ref={productRef}
+        id="productModal"
+        className="modal"
+        style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+      >
         <div className="modal-dialog modal-dialog-centered modal-xl">
           <div className="modal-content border-0 shadow">
             <div className="modal-header border-bottom">
-              <h5 className="modal-title fs-4">{modelMode === "create" ? "新增產品" : "編輯產品"}</h5>
-              <button onClick={closeProductModel} type="button" className="btn-close" aria-label="Close"></button>
+              <h5 className="modal-title fs-4">
+                {modelMode === "create" ? "新增產品" : "編輯產品"}
+              </h5>
+              <button
+                onClick={closeProductModel}
+                type="button"
+                className="btn-close"
+                aria-label="Close"
+              ></button>
             </div>
 
             <div className="modal-body p-4">
@@ -321,14 +359,21 @@ function App() {
                         onChange={handleModelChange}
                       />
                     </div>
-                    <img src={tempProduct.imageUrl} alt={tempProduct.title} className="img-fluid" />
+                    <img
+                      src={tempProduct.imageUrl}
+                      alt={tempProduct.title}
+                      className="img-fluid"
+                    />
                   </div>
 
                   {/* 副圖 */}
                   <div className="border border-2 border-dashed rounded-3 p-3">
                     {tempProduct.imagesUrl?.map((image, index) => (
                       <div key={index} className="mb-2">
-                        <label htmlFor={`imagesUrl-${index + 1}`} className="form-label">
+                        <label
+                          htmlFor={`imagesUrl-${index + 1}`}
+                          className="form-label"
+                        >
                           副圖 {index + 1}
                         </label>
                         <input
@@ -341,22 +386,37 @@ function App() {
                           placeholder={`圖片網址 ${index + 1}`}
                           className="form-control mb-2"
                         />
-                        {image && <img src={image} alt={`副圖 ${index + 1}`} className="img-fluid mb-2" />}
+                        {image && (
+                          <img
+                            src={image}
+                            alt={`副圖 ${index + 1}`}
+                            className="img-fluid mb-2"
+                          />
+                        )}
                       </div>
                     ))}
                     <div className="btn-group gap-2 w-100 mt-3">
                       {Array.isArray(tempProduct.imagesUrl) &&
                         tempProduct.imagesUrl.length < 5 &&
-                        tempProduct.imagesUrl[tempProduct.imagesUrl.length - 1] !== "" && (
-                          <button onClick={handleImageAdd} className="btn btn-outline-primary btn-sm w-100 round-4">
+                        tempProduct.imagesUrl[
+                          tempProduct.imagesUrl.length - 1
+                        ] !== "" && (
+                          <button
+                            onClick={handleImageAdd}
+                            className="btn btn-outline-primary btn-sm w-100 round-4"
+                          >
                             新增圖片
                           </button>
                         )}
-                      {Array.isArray(tempProduct.imagesUrl) && tempProduct.imagesUrl.length > 1 && (
-                        <button onClick={handleImageDel} className="btn btn-outline-danger btn-sm w-100 round-4">
-                          取消圖片
-                        </button>
-                      )}
+                      {Array.isArray(tempProduct.imagesUrl) &&
+                        tempProduct.imagesUrl.length > 1 && (
+                          <button
+                            onClick={handleImageDel}
+                            className="btn btn-outline-danger btn-sm w-100 round-4"
+                          >
+                            取消圖片
+                          </button>
+                        )}
                     </div>
                   </div>
                 </div>
@@ -486,32 +546,58 @@ function App() {
             </div>
 
             <div className="modal-footer border-top bg-light">
-              <button onClick={closeProductModel} type="button" className="btn btn-secondary">
+              <button
+                onClick={closeProductModel}
+                type="button"
+                className="btn btn-secondary"
+              >
                 取消
               </button>
-              <button onClick={updateProduct} type="button" className="btn btn-primary">
+              <button
+                onClick={updateProduct}
+                type="button"
+                className="btn btn-primary"
+              >
                 確認
               </button>
             </div>
           </div>
         </div>
       </div>
-      <div ref={delProductRef} className="modal fade" id="delProductModal" tabIndex="-1" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
+      <div
+        ref={delProductRef}
+        className="modal fade"
+        id="delProductModal"
+        tabIndex="-1"
+        style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+      >
         <div className="modal-dialog modal-dialog-centered">
           <div className="modal-content">
             <div className="modal-header">
               <h1 className="modal-title fs-5">刪除產品</h1>
-              <button type="button" className="btn-close" onClick={closeDelModel}></button>
+              <button
+                type="button"
+                className="btn-close"
+                onClick={closeDelModel}
+              ></button>
             </div>
             <div className="modal-body">
               你是否要刪除
               <span className="text-danger fw-bold">{tempProduct.title}</span>
             </div>
             <div className="modal-footer">
-              <button onClick={closeDelModel} type="button" className="btn btn-secondary">
+              <button
+                onClick={closeDelModel}
+                type="button"
+                className="btn btn-secondary"
+              >
                 取消
               </button>
-              <button onClick={handleDelProduct} type="button" className="btn btn-danger">
+              <button
+                onClick={handleDelProduct}
+                type="button"
+                className="btn btn-danger"
+              >
                 刪除
               </button>
             </div>
