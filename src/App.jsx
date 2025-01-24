@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { Modal } from "bootstrap";
+import LoginPage from "./pages/LoginPage";
 
 const apiUrl = import.meta.env.VITE_BASE_URL;
 const apiPath = import.meta.env.VITE_API_PATH;
@@ -24,12 +25,15 @@ function App() {
     });
   };
 
-  const getProducts = async () => {
+  const getProducts = async (page = 1) => {
     try {
-      const res = await axios.get(`${apiUrl}/v2/api/${apiPath}/admin/products`);
+      const res = await axios.get(
+        `${apiUrl}/v2/api/${apiPath}/admin/products?page=${page}`
+      );
       setProducts(res.data.products);
+      setPagination(res.data.pagination);
     } catch (error) {
-      alert("取得產品失敗");
+      alert(`取得產品失敗,${error}`);
     }
   };
 
@@ -38,14 +42,13 @@ function App() {
 
     try {
       const res = await axios.post(`${apiUrl}/v2/admin/signin`, account);
-
       const { token, expired } = res.data;
       document.cookie = `fabio20=${token}; expires=${new Date(expired)}`;
       axios.defaults.headers.common["Authorization"] = token;
       getProducts();
       setIsAuth(true);
     } catch (error) {
-      alert("登入失敗");
+      alert(`登入失敗,${error}`);
     }
   };
 
@@ -60,12 +63,12 @@ function App() {
   };
 
   useEffect(() => {
-    checkUserLogin();
     const token = document.cookie.replace(
       /(?:(?:^|.*;\s*)fabio20\s*\=\s*([^;]*).*$)|^.*$/,
       "$1"
     );
     axios.defaults.headers.common["Authorization"] = token;
+    checkUserLogin();
   }, []);
   //model
   const productRef = useRef(null);
@@ -222,7 +225,31 @@ function App() {
       alert("刪除產品失敗");
     }
   };
+  //分頁
+  const [pagination, setPagination] = useState({});
 
+  const pagesChange = (page) => {
+    getProducts(page);
+  };
+  //上傳
+  const handleFileChange = async (e) => {
+    const file = e.target.files[0];
+    const formData = new FormData();
+    formData.append("file-to-upload", file);
+    try {
+      const res = await axios.post(
+        `${apiUrl}/v2/api/${apiPath}/admin/upload`,
+        formData
+      );
+      const uploadImageUrl = res.data.imageUrl;
+      setTempProduct({
+        ...tempProduct,
+        imageUrl: uploadImageUrl,
+      });
+    } catch (error) {
+      alert(`上傳錯誤,${error}`);
+    }
+  };
   return (
     <>
       {isAuth ? (
@@ -239,7 +266,7 @@ function App() {
                   新增產品
                 </button>
               </div>
-
+              <div className="d-flex justify-content-center"></div>
               <table className="table">
                 <thead>
                   <tr>
@@ -284,42 +311,60 @@ function App() {
                     </tr>
                   ))}
                 </tbody>
-              </table>
+              </table>{" "}
+              <nav className="col">
+                <ul
+                  className="pagination mt-5"
+                  style={{ width: "fit-content" }}
+                >
+                  <li
+                    className={`page-item ${!pagination.has_pre && "disabled"}`}
+                    onClick={() => pagesChange(pagination.current_page - 1)}
+                  >
+                    <a className="page-link" href="#">
+                      上一頁
+                    </a>
+                  </li>
+
+                  {Array.from({ length: pagination.total_pages }).map(
+                    (_, index) => (
+                      <li
+                        key={index}
+                        className={`page-item ${
+                          pagination.current_page === index + 1 && "active"
+                        }`}
+                      >
+                        <a className="page-link" href="#">
+                          {index + 1}
+                        </a>
+                      </li>
+                    )
+                  )}
+
+                  <li
+                    className={`page-item ${
+                      !pagination.has_next && "disabled"
+                    }`}
+                  >
+                    <a
+                      onClick={() => pagesChange(pagination.current_page + 1)}
+                      className="page-link"
+                      href="#"
+                    >
+                      下一頁
+                    </a>
+                  </li>
+                </ul>
+              </nav>
             </div>
           </div>
         </div>
       ) : (
-        <div className="d-flex flex-column justify-content-center align-items-center vh-100">
-          <h1 className="mb-5">請先登入</h1>
-          <form onSubmit={handleLogin} className="d-flex flex-column gap-3">
-            <div className="form-floating mb-3">
-              <input
-                name="username"
-                value={account.username}
-                onChange={handleInputChange}
-                type="email"
-                className="form-control"
-                id="username"
-                placeholder="name@example.com"
-              />
-              <label htmlFor="username">Email address</label>
-            </div>
-            <div className="form-floating">
-              <input
-                name="password"
-                value={account.password}
-                onChange={handleInputChange}
-                type="password"
-                className="form-control"
-                id="password"
-                placeholder="Password"
-              />
-              <label htmlFor="password">Password</label>
-            </div>
-            <button className="btn btn-primary">登入</button>
-          </form>
-          <p className="mt-5 mb-3 text-muted">&copy; 2024~∞ - 六角學院</p>
-        </div>
+        <LoginPage
+          handleInputChange={handleInputChange}
+          handleLogin={handleLogin}
+          account={account}
+        />
       )}
       <div
         ref={productRef}
@@ -344,6 +389,19 @@ function App() {
             <div className="modal-body p-4">
               <div className="row g-4">
                 <div className="col-md-4">
+                  <div className="mb-5">
+                    <label htmlFor="fileInput" className="form-label">
+                      {" "}
+                      圖片上傳{" "}
+                    </label>
+                    <input
+                      type="file"
+                      accept=".jpg,.jpeg,.png"
+                      className="form-control"
+                      id="fileInput"
+                      onChange={handleFileChange}
+                    />
+                  </div>
                   <div className="mb-4">
                     <label htmlFor="primary-image" className="form-label">
                       主圖
