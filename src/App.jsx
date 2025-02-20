@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import axios from "axios";
-import { Modal } from "bootstrap";
 import LoginPage from "./pages/LoginPage";
 import ProductPage from "./pages/ProductPage";
 import EditModel from "./component/editModel";
 import DelModel from "./component/DelModel";
+import PagePagination from "./component/PagePagination";
 
 const apiUrl = import.meta.env.VITE_BASE_URL;
 const apiPath = import.meta.env.VITE_API_PATH;
@@ -30,9 +30,7 @@ function App() {
 
   const getProducts = async (page = 1) => {
     try {
-      const res = await axios.get(
-        `${apiUrl}/v2/api/${apiPath}/admin/products?page=${page}`
-      );
+      const res = await axios.get(`${apiUrl}/v2/api/${apiPath}/admin/products?page=${page}`);
       setProducts(res.data.products);
       setPagination(res.data.pagination);
     } catch (error) {
@@ -66,10 +64,7 @@ function App() {
   };
 
   useEffect(() => {
-    const token = document.cookie.replace(
-      /(?:(?:^|.*;\s*)fabio20\s*\=\s*([^;]*).*$)|^.*$/,
-      "$1"
-    );
+    const token = document.cookie.replace(/(?:(?:^|.*;\s*)fabio20\s*\=\s*([^;]*).*$)|^.*$/, "$1");
     axios.defaults.headers.common["Authorization"] = token;
     checkUserLogin();
   }, []);
@@ -179,17 +174,14 @@ function App() {
   };
   const editProduct = async () => {
     try {
-      await axios.put(
-        `${apiUrl}/v2/api/${apiPath}/admin/product/${tempProduct.id}`,
-        {
-          data: {
-            ...tempProduct,
-            origin_price: Number(tempProduct.origin_price),
-            price: Number(tempProduct.price),
-            is_enabled: tempProduct.is_enabled ? 1 : 0,
-          },
-        }
-      );
+      await axios.put(`${apiUrl}/v2/api/${apiPath}/admin/product/${tempProduct.id}`, {
+        data: {
+          ...tempProduct,
+          origin_price: Number(tempProduct.origin_price),
+          price: Number(tempProduct.price),
+          is_enabled: tempProduct.is_enabled ? 1 : 0,
+        },
+      });
     } catch (error) {
       alert("更新產品失敗");
     }
@@ -207,9 +199,7 @@ function App() {
 
   const delProduct = async () => {
     try {
-      await axios.delete(
-        `${apiUrl}/v2/api/${apiPath}/admin/product/${tempProduct.id}`
-      );
+      await axios.delete(`${apiUrl}/v2/api/${apiPath}/admin/product/${tempProduct.id}`);
     } catch (error) {
       alert("刪除產品失敗");
     }
@@ -236,10 +226,7 @@ function App() {
     const formData = new FormData();
     formData.append("file-to-upload", file);
     try {
-      const res = await axios.post(
-        `${apiUrl}/v2/api/${apiPath}/admin/upload`,
-        formData
-      );
+      const res = await axios.post(`${apiUrl}/v2/api/${apiPath}/admin/upload`, formData);
       const uploadImageUrl = res.data.imageUrl;
       setTempProduct({
         ...tempProduct,
@@ -252,19 +239,12 @@ function App() {
   return (
     <>
       {isAuth ? (
-        <ProductPage
-          openProductModel={openProductModel}
-          openDelModel={openDelModel}
-          pagesChange={pagesChange}
-          pagination={pagination}
-          products={products}
-        />
+        <>
+          <ProductPage openProductModel={openProductModel} openDelModel={openDelModel} products={products} />
+          <PagePagination pagesChange={pagesChange} pagination={pagination} />
+        </>
       ) : (
-        <LoginPage
-          handleInputChange={handleInputChange}
-          handleLogin={handleLogin}
-          account={account}
-        />
+        <LoginPage handleInputChange={handleInputChange} handleLogin={handleLogin} account={account} />
       )}
       <EditModel
         modelMode={modelMode}

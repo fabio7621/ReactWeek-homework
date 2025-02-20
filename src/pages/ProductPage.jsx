@@ -1,21 +1,11 @@
-function ProductPage({
-  openProductModel,
-  openDelModel,
-  pagesChange,
-  pagination,
-  products,
-}) {
+function ProductPage({ openProductModel, openDelModel, products }) {
   return (
     <div className="container py-5">
       <div className="row">
         <div className="col">
           <div className="d-flex justify-content-between">
             <h2>產品列表</h2>
-            <button
-              onClick={() => openProductModel("create")}
-              type="button"
-              className="btn btn-primary"
-            >
+            <button onClick={() => openProductModel("create")} type="button" className="btn btn-primary">
               新增產品
             </button>
           </div>
@@ -36,27 +26,13 @@ function ProductPage({
                   <th scope="row">{product.title}</th>
                   <td>{product.origin_price}</td>
                   <td>{product.price}</td>
-                  <td>
-                    {product.is_enabled ? (
-                      <span className="text-success">啟用</span>
-                    ) : (
-                      <span>未啟用</span>
-                    )}
-                  </td>
+                  <td>{product.is_enabled ? <span className="text-success">啟用</span> : <span>未啟用</span>}</td>
                   <td>
                     <div className="btn-group">
-                      <button
-                        onClick={() => openProductModel("edit", product)}
-                        type="button"
-                        className="btn btn-outline-primary btn-sm"
-                      >
+                      <button onClick={() => openProductModel("edit", product)} type="button" className="btn btn-outline-primary btn-sm">
                         編輯
                       </button>
-                      <button
-                        onClick={() => openDelModel(product)}
-                        type="button"
-                        className="btn btn-outline-danger btn-sm"
-                      >
+                      <button onClick={() => openDelModel(product)} type="button" className="btn btn-outline-danger btn-sm">
                         刪除
                       </button>
                     </div>
@@ -65,47 +41,6 @@ function ProductPage({
               ))}
             </tbody>
           </table>{" "}
-          <nav className="col">
-            <ul className="pagination mt-5" style={{ width: "fit-content" }}>
-              <li
-                className={`page-item ${!pagination.has_pre && "disabled"}`}
-                onClick={() => pagesChange(pagination.current_page - 1)}
-              >
-                <a className="page-link" href="#">
-                  上一頁
-                </a>
-              </li>
-
-              {Array.from({ length: pagination.total_pages }).map(
-                (_, index) => (
-                  <li
-                    key={index}
-                    className={`page-item ${
-                      pagination.current_page === index + 1 && "active"
-                    }`}
-                  >
-                    <a
-                      onClick={() => pagesChange(index + 1)}
-                      className="page-link"
-                      href="#"
-                    >
-                      {index + 1}
-                    </a>
-                  </li>
-                )
-              )}
-
-              <li className={`page-item ${!pagination.has_next && "disabled"}`}>
-                <a
-                  onClick={() => pagesChange(pagination.current_page + 1)}
-                  className="page-link"
-                  href="#"
-                >
-                  下一頁
-                </a>
-              </li>
-            </ul>
-          </nav>
         </div>
       </div>
     </div>
