@@ -145,7 +145,34 @@ function EditModel({
                     placeholder="請輸入標題"
                   />
                 </div>
-
+                <div className="mb-3">
+                  <label htmlFor="title" className="form-label">
+                    歌手
+                  </label>
+                  <input
+                    name="singer"
+                    value={tempProduct.singer}
+                    onChange={handleModelChange}
+                    id="singer"
+                    type="text"
+                    className="form-control"
+                    placeholder="歌手或樂團名稱"
+                  />
+                </div>
+                <div className="mb-3">
+                  <label htmlFor="title" className="form-label">
+                    銷量
+                  </label>
+                  <input
+                    name="sales"
+                    value={tempProduct.sales}
+                    onChange={handleModelChange}
+                    id="sales"
+                    type="text"
+                    className="form-control"
+                    placeholder="歌手或樂團名稱"
+                  />
+                </div>
                 <div className="mb-3">
                   <label htmlFor="category" className="form-label">
                     分類

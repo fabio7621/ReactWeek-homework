@@ -33,8 +33,11 @@ function App() {
 
   const getProducts = async (page = 1) => {
     try {
-      const res = await axios.get(`${apiUrl}/v2/api/${apiPath}/admin/products?page=${page}`);
+      const res = await axios.get(
+        `${apiUrl}/v2/api/${apiPath}/admin/products?page=${page}`
+      );
       setProducts(res.data.products);
+
       setPagination(res.data.pagination);
     } catch (error) {
       const { message } = error.response.data;
@@ -73,7 +76,10 @@ function App() {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    const token = document.cookie.replace(/(?:(?:^|.*;\s*)fabio20\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+    const token = document.cookie.replace(
+      /(?:(?:^|.*;\s*)fabio20\s*\=\s*([^;]*).*$)|^.*$/,
+      "$1"
+    );
     axios.defaults.headers.common["Authorization"] = token;
     checkUserLogin();
   }, []);
@@ -93,6 +99,8 @@ function App() {
       setTempProduct({
         imageUrl: "",
         title: "",
+        singer: "",
+        sales: "",
         category: "",
         unit: "",
         origin_price: "",
@@ -122,6 +130,8 @@ function App() {
   const [tempProduct, setTempProduct] = useState({
     imageUrl: "",
     title: "",
+    singer: "",
+    sales: "",
     category: "",
     unit: "",
     origin_price: "",
@@ -185,14 +195,17 @@ function App() {
   };
   const editProduct = async () => {
     try {
-      await axios.put(`${apiUrl}/v2/api/${apiPath}/admin/product/${tempProduct.id}`, {
-        data: {
-          ...tempProduct,
-          origin_price: Number(tempProduct.origin_price),
-          price: Number(tempProduct.price),
-          is_enabled: tempProduct.is_enabled ? 1 : 0,
-        },
-      });
+      await axios.put(
+        `${apiUrl}/v2/api/${apiPath}/admin/product/${tempProduct.id}`,
+        {
+          data: {
+            ...tempProduct,
+            origin_price: Number(tempProduct.origin_price),
+            price: Number(tempProduct.price),
+            is_enabled: tempProduct.is_enabled ? 1 : 0,
+          },
+        }
+      );
       dispatch(pushMessage({ text: "編輯成功", status: "success" }));
     } catch (error) {
       const { message } = error.response.data;
@@ -213,7 +226,9 @@ function App() {
 
   const delProduct = async () => {
     try {
-      await axios.delete(`${apiUrl}/v2/api/${apiPath}/admin/product/${tempProduct.id}`);
+      await axios.delete(
+        `${apiUrl}/v2/api/${apiPath}/admin/product/${tempProduct.id}`
+      );
       dispatch(pushMessage({ text: "刪除成功", status: "success" }));
     } catch (error) {
       const { message } = error.response.data;
@@ -243,7 +258,10 @@ function App() {
     const formData = new FormData();
     formData.append("file-to-upload", file);
     try {
-      const res = await axios.post(`${apiUrl}/v2/api/${apiPath}/admin/upload`, formData);
+      const res = await axios.post(
+        `${apiUrl}/v2/api/${apiPath}/admin/upload`,
+        formData
+      );
       const uploadImageUrl = res.data.imageUrl;
       setTempProduct({
         ...tempProduct,
@@ -274,16 +292,28 @@ function App() {
         <>
           <div className="row mb-3">
             <div className="justify-content-end">
-              <button onClick={() => handleLogout()} type="button" className="btn btn-secondary">
+              <button
+                onClick={() => handleLogout()}
+                type="button"
+                className="btn btn-secondary"
+              >
                 登出
               </button>
             </div>
           </div>
-          <ProductPage openProductModel={openProductModel} openDelModel={openDelModel} products={products} />
+          <ProductPage
+            openProductModel={openProductModel}
+            openDelModel={openDelModel}
+            products={products}
+          />
           <PagePagination pagesChange={pagesChange} pagination={pagination} />
         </>
       ) : (
-        <LoginPage handleInputChange={handleInputChange} handleLogin={handleLogin} account={account} />
+        <LoginPage
+          handleInputChange={handleInputChange}
+          handleLogin={handleLogin}
+          account={account}
+        />
       )}
       <EditModel
         modelMode={modelMode}
